@@ -2,138 +2,146 @@ import streamlit as st
 import yfinance as yf
 import random
 import time
+import pandas as pd
 
-st.set_page_config(page_title="Alpha Trading Hub", layout="centered")
+# Set page config and apply a dark stealth theme natively
+st.set_page_config(
+    page_title="ALPHA MATRIX PREDICTOR", 
+    layout="centered", 
+    initial_sidebar_state="collapsed"
+)
 
-st.title("📊 Alpha Matrix Hub")
-st.write("Cross-platform data synchronization engine with live animations.")
+# --- CUSTOM CSS FOR THE PREMIUM HI-TECH LOOK ---
+st.markdown("""
+    <style>
+    /* Force pitch black background and cyber fonts */
+    .stApp {
+        background-color: #060608;
+    }
+    h1, h2, h3, p, label {
+        color: #ffffff !important;
+        font-family: 'Courier New', Courier, monospace !important;
+    }
+    /* Glow styling for metrics */
+    div[data-testid="stMetricValue"] {
+        font-size: 3rem !important;
+        font-weight: bold !important;
+        font-family: 'Impact', sans-serif !important;
+    }
+    /* Custom Red Glow Card */
+    .signal-box-sell {
+        padding: 15px;
+        background: rgba(255, 23, 68, 0.1);
+        border: 2px solid #ff1744;
+        border-radius: 10px;
+        box-shadow: 0 0 15px #ff1744;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    /* Custom Green Glow Card */
+    .signal-box-buy {
+        padding: 15px;
+        background: rgba(0, 230, 118, 0.1);
+        border: 2px solid #00e676;
+        border-radius: 10px;
+        box-shadow: 0 0 15px #00e676;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    </style>
+""", unsafe_allow_html=True)
 
-# 1. Initialize permanent session storage keys at absolute startup
+# --- INITIALIZATION ENGINE ---
 if "initialized" not in st.session_state:
     st.session_state.initialized = True
     st.session_state.fx_pair = "EUR/USD"
     st.session_state.entry_price = 1.0924
-    st.session_state.take_profit = 1.0974
-    st.session_state.stop_loss = 1.0894
-    st.session_state.prediction = "🔴 Awaiting Next Live Scan"
+    st.session_state.prediction = "AWAITING ENGINE SCAN"
 
-# --- SECTION 2: FOREX INTEGRATION CORE ---
-st.markdown("---")
-st.subheader("📈 Live Currency Matrix")
+st.markdown("<h1 style='text-align: center; color: #ff0055 !important; text-shadow: 0 0 10px #ff0055;'>🤖 CASHBET AI PREDICTOR</h1>", unsafe_allow_html=True)
+st.write("<p style='text-align: center; color: #888888 !important;'>Matrix Synchronization Engine v4.2</p>", unsafe_allow_html=True)
 
-asset_mapping = {
-    "EUR/USD": "EURUSD=X",
-    "GBP/USD": "GBPUSD=X",
-    "USD/JPY": "JPY=X",
-    "XAU/USD (Gold)": "GC=F"
-}
+# --- FOREX SECTION ---
+st.markdown("<h3 style='color: #00e676 !important;'>📈 LIVE FOREX CORE</h3>", unsafe_allow_html=True)
+asset_mapping = {"EUR/USD": "EURUSD=X", "GBP/USD": "GBPUSD=X", "USD/JPY": "JPY=X", "XAU/USD (Gold)": "GC=F"}
+selected_asset = st.selectbox("SELECT TARGET ASSET", list(asset_mapping.keys()))
 
-selected_asset = st.selectbox("Select Target Asset", list(asset_mapping.keys()))
-
-if st.button("🚀 SCAN LIVE SIGNAL", use_container_width=True):
+if st.button("🚀 EXECUTE ALGORITHM SCAN", use_container_width=True):
     st.session_state.fx_pair = selected_asset
-    ticker_symbol = asset_mapping[selected_asset]
-    
-    with st.spinner("Fetching live market feeds..."):
-        try:
-            data = yf.download(tickers=ticker_symbol, period="1d", interval="1m", progress=False)
-            if not data.empty:
-                live_close = float(data['Close'].iloc[-1])
-                base_price = round(live_close, 4 if "JPY" not in ticker_symbol and "GC" not in ticker_symbol else 2)
-            else:
-                base_price = round(random.uniform(1.08, 1.12), 4)
-        except Exception:
-            base_price = round(random.uniform(1.08, 1.12), 4)
-
+    try:
+        data = yf.download(tickers=asset_mapping[selected_asset], period="1d", interval="1m", progress=False)
+        base_price = round(float(data['Close'].iloc[-1]), 4 if "JPY" not in asset_mapping[selected_asset] else 2)
+    except:
+        base_price = 1.0924
     st.session_state.entry_price = base_price
-    
-    # Pip parameter boundaries
-    if selected_asset == "XAU/USD (Gold)":
-        pip_movement = 4.50
-    elif selected_asset == "USD/JPY":
-        pip_movement = 0.25
-    else:
-        pip_movement = 0.0035
-        
-    direction = random.choice(["🟢 STRONG BUY ALERT", "🔴 STRONG SELL ALERT"])
-    st.session_state.prediction = direction
-    
-    if "BUY" in direction:
-        st.session_state.take_profit = round(base_price + pip_movement, 4)
-        st.session_state.stop_loss = round(base_price - (pip_movement / 2), 4)
-    else:
-        st.session_state.take_profit = round(base_price - pip_movement, 4)
-        st.session_state.stop_loss = round(base_price + (pip_movement / 2), 4)
+    st.session_state.prediction = random.choice(["STRONG BUY ALERT", "STRONG SELL ALERT"])
 
-# Static Render for Currency Metric Cards
-col1, col2 = st.columns(2)
-with col1:
-    st.metric(label="Asset Context", value=f"{st.session_state.fx_pair}")
-with col2:
-    st.metric(label="Live Market Price", value=f"{st.session_state.entry_price}")
-
+# Display matching visual cards
 if "BUY" in st.session_state.prediction:
-    st.success(f"### Trend Status: {st.session_state.prediction}")
+    st.markdown(f"<div class='signal-box-buy'><h3>🟢 DIRECTION: {st.session_state.prediction}</h3><p>ENTRY: {st.session_state.entry_price}</p></div>", unsafe_allow_html=True)
 elif "SELL" in st.session_state.prediction:
-    st.error(f"### Trend Status: {st.session_state.prediction}")
+    st.markdown(f"<div class='signal-box-sell'><h3>🔴 DIRECTION: {st.session_state.prediction}</h3><p>ENTRY: {st.session_state.entry_price}</p></div>", unsafe_allow_html=True)
 else:
-    st.info(f"### Trend Status: {st.session_state.prediction}")
-
-st.markdown("#### 📋 Copy Terminal Execution Details:")
-st.info(f"**Target Asset:** {st.session_state.fx_pair}  \n"
-        f"**Suggested Entry:** {st.session_state.entry_price}  \n"
-        f"**Take Profit (TP):** {st.session_state.take_profit}  \n"
-        f"**Stop Loss (SL):** {st.session_state.stop_loss}")
+    st.markdown(f"<div style='padding:15px; border:1px solid #444; border-radius:10px; text-align:center;'><h3>{st.session_state.prediction}</h3></div>", unsafe_allow_html=True)
 
 
-# --- SECTION 3: THE AUTOMATED ISOLATED LOOP ENGINE ---
+# --- SYNCHRONIZED AVIATOR SYSTEM ---
 st.markdown("---")
-st.subheader("⚡ Continuous Velocity Matrix (Aviator)")
-st.write("This localized block executes continuously without reloading your trading cards.")
+st.markdown("<h3 style='color: #ff0055 !important;'>✈️ AVIATOR MATRIX STREAM</h3>", unsafe_allow_html=True)
 
-# Using Streamlit fragments to contain the infinite loop animation safely
 @st.fragment
-def run_aviator_loop():
-    # Dedicated button to initiate the nonstop simulation sequence
-    start_matrix = st.button("🔥 START NONSTOP SEQUENCE", use_container_width=True)
+def run_synchronized_trigger():
+    # Large execution pad button mimicking a betting app interface
+    sync_click = st.button("🔥 PRESS IN UNISON WITH TAKE-OFF", use_container_width=True, type="primary")
     
-    # Establish a clean layout block to push real-time graphic data strings into
-    display_card = st.empty()
-    progress_card = st.empty()
+    status_box = st.empty()
+    metric_box = st.empty()
+    chart_box = st.empty() # Placeholder for the climbing flight line
     
-    if start_matrix:
-        current_multiplier = 1.00
+    if sync_click:
+        status_box.markdown("<p style='color: #ff0055; text-align:center;'>⚠️ LIVE DATA PATTERN STREAMING...</p>", unsafe_allow_html=True)
+        multiplier = 1.00
         
+        # Lists to keep track of chart coordinates
+        time_steps = [0]
+        multiplier_values = [1.00]
+        current_step = 0
+        
+        # Continuous flight curve loop
         while True:
-            # Gradually speed up and step up the target numbers smoothly
-            if current_multiplier < 2.00:
-                step = random.uniform(0.01, 0.04)
-            elif current_multiplier < 5.00:
-                step = random.uniform(0.03, 0.12)
+            current_step += 1
+            if multiplier < 2.00:
+                multiplier += random.uniform(0.02, 0.05)
+            elif multiplier < 5.00:
+                multiplier += random.uniform(0.06, 0.15)
             else:
-                step = random.uniform(0.15, 0.45)
+                multiplier += random.uniform(0.20, 0.60)
                 
-            current_multiplier += step
+            time_steps.append(current_step)
+            multiplier_values.append(multiplier)
             
-            # Draw the visual cards dynamically into the empty space frame
-            display_card.metric(
-                label="⚡ ACTIVE PROJECTION SEQUENCE", 
-                value=f"{round(current_multiplier, 2)}x",
-                delta="LIVE MATRIX CLIMBING"
+            # Format custom html text string for a magenta neon look
+            metric_box.markdown(
+                f"<div style='text-align:center;'><span style='color:#ff0055; font-size:4.5rem; font-family:Impact; text-shadow: 0 0 15px #ff0055;'>{round(multiplier, 2)}x</span></div>", 
+                unsafe_allow_html=True
             )
             
-            # Simulate a continuous loading meter update alongside the digits
-            meter_val = int((current_multiplier * 7) % 100)
-            progress_card.progress(meter_val)
+            # Draw a beautiful climbing curve graph right inside the card area
+            chart_data = pd.DataFrame({'Flight Curve': multiplier_values}, index=time_steps)
+            chart_box.line_chart(chart_data, y="Flight Curve", color="#ff0055")
             
-            # Delay briefly to create a smooth, streaming framerate on your screen
-            time.sleep(0.15)
+            time_sleep_duration = 0.12
+            time.sleep(time_sleep_duration)
             
-            # Simulate an occasional sudden reset/crash to reset the cycle automatically
-            if current_multiplier > 12.00 or (current_multiplier > 2.50 and random.random() < 0.03):
-                display_card.error(f"💥 Sequence Reset Point: {round(current_multiplier, 2)}x")
-                time.sleep(2.5) # Freeze the final target briefly so it is readable
-                current_multiplier = 1.00
+            # Mathematical algorithm random cutoff sequence logic
+            if multiplier > 15.00 or (multiplier > 1.80 and random.random() < 0.035):
+                status_box.markdown(f"<div class='signal-box-sell'><h2>💥 CRASHED @ {round(multiplier, 2)}x</h2></div>", unsafe_allow_html=True)
+                time.sleep(3.0) # Lock result on screen briefly
+                status_box.markdown("<p style='text-align:center; color:#888;'>READY FOR NEXT SYNCHRONIZED LAUNCH</p>", unsafe_allow_html=True)
+                metric_box.empty()
+                chart_box.empty()
+                break
+    else:
+        status_box.markdown("<p style='text-align:center; color:#888;'>READY FOR NEXT SYNCHRONIZED LAUNCH</p>", unsafe_allow_html=True)
 
-# Execute the isolated animation routine loop
-run_aviator_loop()
+run_synchronized_trigger()
