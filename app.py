@@ -1,35 +1,90 @@
 import streamlit as st
-import time
 import random
+import time
 
-st.set_page_config(page_title="Live Analytics Dashboard", layout="centered")
+st.set_page_config(page_title="Alpha Trading Hub", layout="centered")
 
-st.title("📊 Real-Time Market Analytics")
-st.write("This clean web interface handles live data streams effortlessly on mobile.")
+st.title("📊 Alpha Matrix Hub")
+st.write("Generate synchronized market trends and velocity sequence signals.")
 
-# Create clean display placeholders
-card_forex = st.container()
-card_aviator = st.container()
+# Initialize standard session states to hold numbers steady until clicked
+if "fx_pair" not in st.session_state:
+    st.session_state.fx_pair = "EUR/USD"
+    st.session_state.entry_price = 1.0924
+    st.session_state.take_profit = 1.0974
+    st.session_state.stop_loss = 1.0894
+    st.session_state.prediction = "🔴 Awaiting Next Signal Scan"
+    st.session_state.pred_color = "inverse"
+    st.session_state.aviator_multiplier = "1.00x"
 
-# Generate fresh data points on this page load
-fx_val = round(random.uniform(1.0800, 1.3200), 4)
-fx_pair = random.choice(["EUR/USD", "GBP/USD", "USD/JPY"])
-fx_action = random.choice(["🟢 BUY TREND", "🔴 SELL TREND"])
+# --- SECTION 1: THE FOREX SIGNAL GENERATOR ---
+st.markdown("---")
+st.subheader("📈 Core Currency Matrix")
 
-with card_forex:
-    st.markdown("### 📈 Currency Matrix Stream")
-    st.metric(label=f"Asset: {fx_pair}", value=f"{fx_val}", delta=fx_action)
-    st.caption("Refreshes automatically.")
+# User input to match your trading terminal asset
+selected_asset = st.selectbox("Select Target Asset", ["EUR/USD", "GBP/USD", "USD/JPY", "XAU/USD (Gold)"])
 
-seq_multiplier = round(random.uniform(1.20, 3.50), 2)
-stability = random.randint(75, 95)
+# Interactive action button to run calculations
+if st.button("🚀 SCAN CURRENT SIGNAL"):
+    st.session_state.fx_pair = selected_asset
+    
+    # Simulate a dynamic market baseline calculation
+    if selected_asset == "XAU/USD (Gold)":
+        base_price = round(random.uniform(2300.00, 2350.00), 2)
+        pip_movement = 5.00
+    elif selected_asset == "USD/JPY":
+        base_price = round(random.uniform(155.00, 158.00), 2)
+        pip_movement = 0.35
+    else:
+        base_price = round(random.uniform(1.0800, 1.1200), 4)
+        pip_movement = 0.0050
 
-with card_aviator:
-    st.markdown("### ⚡ Velocity Sequence Stream")
-    st.metric(label="Target Multiplier", value=f"{seq_multiplier}x")
-    st.progress(stability)
-    st.caption(f"Calculated Stability Rating: {stability}%")
+    st.session_state.entry_price = base_price
+    
+    # Determine direction logic
+    direction = random.choice(["🟢 STRONG BUY ALERT", "🔴 STRONG SELL ALERT"])
+    st.session_state.prediction = direction
+    
+    if "BUY" in direction:
+        st.session_state.pred_color = "normal"
+        st.session_state.take_profit = round(base_price + pip_movement, 4)
+        st.session_state.stop_loss = round(base_price - (pip_movement / 2), 4)
+    else:
+        st.session_state.pred_color = "inverse"
+        st.session_state.take_profit = round(base_price - pip_movement, 4)
+        st.session_state.stop_loss = round(base_price + (pip_movement / 2), 4)
 
-# Wait 5 seconds, then safely refresh the entire page state
-time.sleep(5)
-st.rerun()
+# Layout displaying clean data parameters ready for copying to Meta/Exness
+col1, col2 = st.columns(2)
+with col1:
+    st.metric(label=f"Asset Context: {st.session_state.fx_pair}", value=f"{st.session_state.entry_price}")
+with col2:
+    st.metric(label="Calculated Action Status", value=st.session_state.prediction, delta=None)
+
+st.markdown("#### 📋 Copy Terminal Execution Details:")
+st.info(f"**Target Asset:** {st.session_state.fx_pair}  \n"
+        f"**Suggested Entry:** {st.session_state.entry_price}  \n"
+        f"**Take Profit (TP):** {st.session_state.take_profit}  \n"
+        f"**Stop Loss (SL):** {st.session_state.stop_loss}")
+
+
+# --- SECTION 2: SYNCHRONIZED AVIATOR VELOCITY STREAM ---
+st.markdown("---")
+st.subheader("⚡ Synchronized Velocity Stream (Aviator)")
+st.write("Trigger this matrix simultaneously to synchronize execution parameters.")
+
+# The dual action button requested: calculates the multiplier sequence on call
+if st.button("🔥 RUN SYNCHRONIZED MULTIPLIER"):
+    # Generate the crash value point data pattern
+    weight_chance = random.random()
+    if weight_chance < 0.15: # 15% chance of early blue crash
+        val = random.uniform(1.01, 1.15)
+    elif weight_chance < 0.70: # 55% chance of normal average curve
+        val = random.uniform(1.20, 2.50)
+    else: # 30% chance of high purple/pink run
+        val = random.uniform(2.51, 12.50)
+        
+    st.session_state.aviator_multiplier = f"{round(val, 2)}x"
+
+st.metric(label="Target Crash Prediction", value=st.session_state.aviator_multiplier)
+st.caption("Note: Aviator matrix algorithms change rapidly. Use data sequences for baseline testing only.")
